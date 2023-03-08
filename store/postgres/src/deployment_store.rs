@@ -1083,7 +1083,7 @@ impl DeploymentStore {
         layout.find_many(&conn, ids_for_type, block)
     }
 
-    pub(crate) fn get_where(
+    pub(crate) fn get_derived(
         &self,
         site: Arc<Site>,
         key: &EntityDerived,
@@ -1091,7 +1091,7 @@ impl DeploymentStore {
     ) -> Result<Vec<Entity>, StoreError> {
         let conn = self.get_conn()?;
         let layout = self.layout(&conn, site)?;
-        layout.find_where(&conn, key, block)
+        layout.find_derived(&conn, key, block)
     }
 
     pub(crate) fn get_changes(

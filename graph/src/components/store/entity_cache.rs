@@ -118,16 +118,15 @@ impl EntityCache {
                 let list = list.iter();
                 list.for_each(|(k, v)| println!("{}: {:?}", k, v));
             }
-            None => println!("No entity found for {:?}", eref),
+            None => println!("get: No entity found for {:?}", eref),
         }
         Ok(entity)
     }
 
-    pub fn get_where(
+    pub fn get_derived(
         &mut self,
         eref: &EntityDerived,
     ) -> Result<Vec<Entity>, s::QueryExecutionError> {
-        println!("HELLO WORLD, YOU TRIGERED store.getWhere");
         self.current.get_entity(&*self.store, &EntityMultiKey::All(eref.clone()))?;
         let entity = self.current.get_entity(&*self.store, &EntityMultiKey::All(eref.clone()))?;
         let entities = match entity {
@@ -150,11 +149,11 @@ impl EntityCache {
                 entities
             }
             None => {
-                println!("No entity found for {:?}", eref);
+                println!("get_derived: No entity found for {:?}", eref);
                 Vec::new()
             }
         };
-        // self.store.get_where()
+        // self.store.get_derived()
         // todo!();
         Ok(entities)
     }
@@ -362,7 +361,7 @@ impl LfuCache<EntityMultiKey, Option<Entity>> {
                 }
                 EntityMultiKey::All(derived) => {
                     // we get all entities with the derived field
-                    let mut entities = store.get_where(derived)?;
+                    let mut entities = store.get_derived(derived)?;
                     // we asssume that derived fields contains ids
                     let entities = entities.iter_mut().filter(|entity| entity.contains_key("id")).map(|entity| {
                         entity.remove("__typename");
@@ -380,7 +379,8 @@ impl LfuCache<EntityMultiKey, Option<Entity>> {
                     entity.insert(derived.entity_field.to_string(), Value::List(entities));
 
                     // insert to cache the list of ids
-                    self.insert(key.clone(), Some(entity.clone()));
+                    // todo remove this comment
+                    // self.insert(key.clone(), Some(entity.clone()));
 
                     Ok(Some(entity.clone()))
                 }

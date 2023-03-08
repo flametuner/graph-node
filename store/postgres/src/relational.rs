@@ -37,7 +37,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use crate::relational_queries::{FindChangesQuery, FindPossibleDeletionsQuery};
+use crate::relational_queries::{FindChangesQuery, FindPossibleDeletionsQuery, FindDerivedQuery};
 use crate::{
     primary::{Namespace, Site},
     relational_queries::{
@@ -539,7 +539,7 @@ impl Layout {
         Ok(entities)
     }
 
-    pub fn find_where(
+    pub fn find_derived(
         &self,
         conn: &PgConnection,
         key: &EntityDerived,
@@ -712,6 +712,8 @@ impl Layout {
             query.query_id,
             &self.site,
         )?;
+        println!("{}", debug_query(&query).to_string());
+
         let query_clone = query.clone();
 
         let start = Instant::now();

@@ -296,13 +296,13 @@ impl SyncStore {
         })
     }
 
-    fn get_where(
+    fn get_derived(
         &self,
         key: &EntityDerived,
         block: BlockNumber,
     ) -> Result<Vec<Entity>, StoreError> {
-        self.retry("get_where", || {
-            self.writable.get_where(self.site.cheap_clone(), key, block)
+        self.retry("get_derived", || {
+            self.writable.get_derived(self.site.cheap_clone(), key, block)
         })
     }
 
@@ -801,10 +801,10 @@ impl Queue {
         Ok(map)
     }
 
-    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
+    fn get_derived(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
         let tracker = BlockTracker::new();
         // TODO implement the whole async
-        self.store.get_where(key, tracker.query_block())
+        self.store.get_derived(key, tracker.query_block())
     }
 
     /// Load dynamic data sources by looking at both the queue and the store
@@ -961,10 +961,10 @@ impl Writer {
         }
     }
 
-    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
+    fn get_derived(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
         match self {
-            Writer::Sync(store) => store.get_where(key, BLOCK_NUMBER_MAX),
-            Writer::Async(queue) => queue.get_where(key),
+            Writer::Sync(store) => store.get_derived(key, BLOCK_NUMBER_MAX),
+            Writer::Async(queue) => queue.get_derived(key),
         }
     }
 
@@ -1050,8 +1050,8 @@ impl ReadStore for WritableStore {
         self.writer.get_many(keys)
     }
 
-    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
-        self.writer.get_where(key)
+    fn get_derived(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
+        self.writer.get_derived(key)
     }
 
     fn input_schema(&self) -> Arc<Schema> {

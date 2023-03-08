@@ -1161,7 +1161,7 @@ impl ReadStore for EmptyStore {
         Ok(BTreeMap::new())
     }
 
-    fn get_where(
+    fn get_derived(
         &self,
         _query: &EntityDerived,
     ) -> Result<Vec<Entity>, StoreError> {
