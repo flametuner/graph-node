@@ -302,7 +302,8 @@ impl SyncStore {
         block: BlockNumber,
     ) -> Result<Vec<Entity>, StoreError> {
         self.retry("get_derived", || {
-            self.writable.get_derived(self.site.cheap_clone(), key, block)
+            self.writable
+                .get_derived(self.site.cheap_clone(), key, block)
         })
     }
 

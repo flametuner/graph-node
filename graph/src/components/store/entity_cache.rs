@@ -7,7 +7,7 @@ use crate::components::store::{self as s, Entity, EntityKey, EntityOp, EntityOpe
 use crate::prelude::{Schema, ENV_VARS};
 use crate::util::lfu_cache::LfuCache;
 
-use super::{EntityMultiKey, EntityDerived};
+use super::{EntityDerived, EntityMultiKey};
 
 /// A cache for entities from the store that provides the basic functionality
 /// needed for the store interactions in the host exports. This struct tracks
@@ -101,7 +101,9 @@ impl EntityCache {
     pub fn get(&mut self, eref: &EntityKey) -> Result<Option<Entity>, s::QueryExecutionError> {
         // Get the current entity, apply any updates from `updates`, then
         // from `handler_updates`.
-        let mut entity = self.current.get_entity(&*self.store, &EntityMultiKey::Single(eref.clone()))?;
+        let mut entity = self
+            .current
+            .get_entity(&*self.store, &EntityMultiKey::Single(eref.clone()))?;
 
         // Always test the cache consistency in debug mode.
         debug_assert!(entity == self.store.get(eref).unwrap());
@@ -119,8 +121,11 @@ impl EntityCache {
         &mut self,
         eref: &EntityDerived,
     ) -> Result<Vec<Entity>, s::QueryExecutionError> {
-        self.current.get_entity(&*self.store, &EntityMultiKey::Derived(eref.clone()))?;
-        let entity = self.current.get_entity(&*self.store, &EntityMultiKey::Derived(eref.clone()))?;
+        self.current
+            .get_entity(&*self.store, &EntityMultiKey::Derived(eref.clone()))?;
+        let entity = self
+            .current
+            .get_entity(&*self.store, &EntityMultiKey::Derived(eref.clone()))?;
         let entities = match entity {
             Some(e) => {
                 // retrieve the list from the cache
@@ -134,13 +139,12 @@ impl EntityCache {
                                 Ok(Some(value)) => entities.push(value),
                                 _ => (),
                             }
-                            
                         }
                     }
                 }
                 entities
             }
-            None => Vec::new()
+            None => Vec::new(),
         };
         Ok(entities)
     }
@@ -254,10 +258,11 @@ impl EntityCache {
 
         // The first step is to make sure all entities being set are in `self.current`.
         // For each subgraph, we need a map of entity type to missing entity ids.
-        let missing = self
-            .updates
-            .keys()
-            .filter(|key| !self.current.contains_key(&EntityMultiKey::Single((*key).clone())));
+        let missing = self.updates.keys().filter(|key| {
+            !self
+                .current
+                .contains_key(&EntityMultiKey::Single((*key).clone()))
+        });
 
         // For immutable types, we assume that the subgraph is well-behaved,
         // and all updated immutable entities are in fact new, and skip
@@ -269,7 +274,8 @@ impl EntityCache {
         let missing = missing.filter(|key| !self.schema.is_immutable(&key.entity_type));
 
         for (entity_key, entity) in self.store.get_many(missing.cloned().collect())? {
-            self.current.insert(EntityMultiKey::Single(entity_key), Some(entity));
+            self.current
+                .insert(EntityMultiKey::Single(entity_key), Some(entity));
         }
 
         let mut mods = Vec::new();
@@ -285,7 +291,10 @@ impl EntityCache {
                     let mut data = Entity::new();
                     data.merge_remove_null_fields(updates);
                     self.current.insert(key.clone(), Some(data.clone()));
-                    Some(Insert { key: entity_key, data })
+                    Some(Insert {
+                        key: entity_key,
+                        data,
+                    })
                 }
                 // Entity may have been changed
                 (Some(current), EntityOp::Update(updates)) => {
@@ -293,7 +302,10 @@ impl EntityCache {
                     data.merge_remove_null_fields(updates);
                     self.current.insert(key.clone(), Some(data.clone()));
                     if current != data {
-                        Some(Overwrite { key: entity_key, data })
+                        Some(Overwrite {
+                            key: entity_key,
+                            data,
+                        })
                     } else {
                         None
                     }
@@ -302,7 +314,10 @@ impl EntityCache {
                 (Some(current), EntityOp::Overwrite(data)) => {
                     self.current.insert(key.clone(), Some(data.clone()));
                     if current != data {
-                        Some(Overwrite { key: entity_key, data })
+                        Some(Overwrite {
+                            key: entity_key,
+                            data,
+                        })
                     } else {
                         None
                     }
@@ -350,15 +365,18 @@ impl LfuCache<EntityMultiKey, Option<Entity>> {
                     // we get all entities with the derived field
                     let mut entities = store.get_derived(derived)?;
                     // we asssume that derived fields contains ids
-                    let entities = entities.iter_mut().filter(|entity| entity.contains_key("id")).map(|entity| {
-                        entity.remove("__typename");
+                    let entities = entities
+                        .iter_mut()
+                        .filter(|entity| entity.contains_key("id"))
+                        .map(|entity| {
+                            entity.remove("__typename");
 
-                        // we insert each entity into the cache with the id key
-                        let key = EntityKey::from(&entity.id().unwrap().into(), derived);
-                        self.insert(EntityMultiKey::Single(key), Some(entity.clone()));
-                        // return the value to save
-                        Value::String(entity.id().unwrap())
-                    });
+                            // we insert each entity into the cache with the id key
+                            let key = EntityKey::from(&entity.id().unwrap().into(), derived);
+                            self.insert(EntityMultiKey::Single(key), Some(entity.clone()));
+                            // return the value to save
+                            Value::String(entity.id().unwrap())
+                        });
                     let entities = entities.collect();
 
                     // create entity with the list of ids

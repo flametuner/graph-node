@@ -5,7 +5,9 @@ use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use graph::anyhow::Context;
 use graph::blockchain::block_stream::FirehoseCursor;
-use graph::components::store::{EntityKey, EntityType, PruneReporter, StoredDynamicDataSource, EntityDerived};
+use graph::components::store::{
+    EntityDerived, EntityKey, EntityType, PruneReporter, StoredDynamicDataSource,
+};
 use graph::components::versions::VERSIONS;
 use graph::data::query::Trace;
 use graph::data::subgraph::{status, SPEC_VERSION_0_0_6};

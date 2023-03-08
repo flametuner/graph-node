@@ -1031,7 +1031,6 @@ impl<C: Blockchain> WasmInstanceContext<C> {
         field_ptr: AscPtr<AscString>,
         id_ptr: AscPtr<AscString>,
     ) -> Result<AscPtr<Array<AscPtr<AscEntity>>>, HostExportError> {
-
         let entity_type: String = asc_get(self, entity_ptr, gas)?;
         let field: String = asc_get(self, field_ptr, gas)?;
         let id: String = asc_get(self, id_ptr, gas)?;
@@ -1043,7 +1042,10 @@ impl<C: Blockchain> WasmInstanceContext<C> {
             gas,
         )?;
 
-        let entities: Vec<Vec<(String, Value)>> = entities.iter().map(|entity| entity.clone().sorted()).collect();
+        let entities: Vec<Vec<(String, Value)>> = entities
+            .iter()
+            .map(|entity| entity.clone().sorted())
+            .collect();
         let ret = asc_new(self, &entities, gas)?;
         Ok(ret)
     }

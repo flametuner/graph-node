@@ -1,6 +1,6 @@
 use crate::{
     blockchain::Blockchain,
-    components::store::{ReadStore, StoredDynamicDataSource, EntityMultiKey},
+    components::store::{EntityMultiKey, ReadStore, StoredDynamicDataSource},
     data::subgraph::schema::SubgraphError,
     data_source::DataSourceTemplate,
     prelude::*,
