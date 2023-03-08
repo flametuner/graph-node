@@ -37,7 +37,7 @@ use std::str::FromStr;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-use crate::relational_queries::{FindChangesQuery, FindPossibleDeletionsQuery, FindDerivedQuery};
+use crate::relational_queries::{FindChangesQuery, FindDerivedQuery, FindPossibleDeletionsQuery};
 use crate::{
     primary::{Namespace, Site},
     relational_queries::{
@@ -45,7 +45,7 @@ use crate::{
         FilterQuery, FindManyQuery, FindQuery, InsertQuery, RevertClampQuery, RevertRemoveQuery,
     },
 };
-use graph::components::store::{EntityKey, EntityType, EntityDerived};
+use graph::components::store::{EntityDerived, EntityKey, EntityType};
 use graph::data::graphql::ext::{DirectiveFinder, DocumentExt, ObjectTypeExt};
 use graph::data::schema::{FulltextConfig, FulltextDefinition, Schema, SCHEMA_TYPE_NAME};
 use graph::data::store::BYTES_SCALAR;
@@ -547,7 +547,7 @@ impl Layout {
     ) -> Result<Vec<Entity>, StoreError> {
         let table = self.table_for_entity(&key.entity_type)?;
         let query = FindDerivedQuery::new(table, key, block);
-        
+
         let mut entities = Vec::new();
 
         for data in query.load::<EntityData>(conn)? {

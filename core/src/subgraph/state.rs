@@ -1,5 +1,5 @@
 use graph::{
-    components::store::{EntityMultiKey},
+    components::store::EntityMultiKey,
     prelude::Entity,
     util::{backoff::ExponentialBackoff, lfu_cache::LfuCache},
 };
