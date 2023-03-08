@@ -5,6 +5,7 @@ use std::time::Duration;
 use std::{collections::BTreeMap, sync::Arc};
 
 use graph::blockchain::block_stream::FirehoseCursor;
+use graph::components::store::{EntityKey, EntityDerived};
 use graph::components::store::ReadStore;
 use graph::components::store::{DeploymentCursorTracker, EntityKey};
 use graph::data::subgraph::schema;
@@ -294,6 +295,12 @@ impl SyncStore {
         self.retry("get_many", || {
             self.writable
                 .get_many(self.site.cheap_clone(), &by_type, block)
+        })
+    }
+
+    fn get_where(&self, key: &EntityDerived, block: BlockNumber) -> Result<Vec<Entity>, StoreError> {
+        self.retry("get_where", || {
+            self.writable.get_where(self.site.cheap_clone(), key, block)
         })
     }
 
@@ -792,6 +799,12 @@ impl Queue {
         Ok(map)
     }
 
+    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
+        let tracker = BlockTracker::new();
+        // TODO implement the whole async
+        self.store.get_where(key, tracker.query_block())
+    }
+
     /// Load dynamic data sources by looking at both the queue and the store
     async fn load_dynamic_data_sources(
         &self,
@@ -950,6 +963,16 @@ impl Writer {
         }
     }
 
+    fn get_where(
+        &self,
+        key: &EntityDerived,
+    ) -> Result<Vec<Entity>, StoreError> {
+        match self {
+            Writer::Sync(store) => store.get_where(key, BLOCK_NUMBER_MAX),
+            Writer::Async(queue) => queue.get_where(key),
+        }
+    }
+
     async fn load_dynamic_data_sources(
         &self,
         manifest_idx_and_name: Vec<(u32, String)>,
@@ -1037,6 +1060,13 @@ impl ReadStore for WritableStore {
         keys: BTreeSet<EntityKey>,
     ) -> Result<BTreeMap<EntityKey, Entity>, StoreError> {
         self.writer.get_many(keys)
+    }
+
+    fn get_where(
+        &self,
+        key: &EntityDerived
+    ) -> Result<Vec<Entity>, StoreError> {
+        self.writer.get_where(key)
     }
 
     fn input_schema(&self) -> Arc<Schema> {
