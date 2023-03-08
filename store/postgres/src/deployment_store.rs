@@ -6,7 +6,7 @@ use diesel::r2d2::{ConnectionManager, PooledConnection};
 use graph::anyhow::Context;
 use graph::blockchain::block_stream::FirehoseCursor;
 use graph::components::store::{
-    EntityDerived, EntityKey, EntityType, PruneReporter, StoredDynamicDataSource,
+    DerivedEntityQuery, EntityKey, EntityType, PruneReporter, StoredDynamicDataSource,
 };
 use graph::components::versions::VERSIONS;
 use graph::data::query::Trace;
@@ -1088,7 +1088,7 @@ impl DeploymentStore {
     pub(crate) fn get_derived(
         &self,
         site: Arc<Site>,
-        key: &EntityDerived,
+        key: &DerivedEntityQuery,
         block: BlockNumber,
     ) -> Result<Vec<Entity>, StoreError> {
         let conn = self.get_conn()?;

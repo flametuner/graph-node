@@ -45,7 +45,7 @@ use crate::{
         FilterQuery, FindManyQuery, FindQuery, InsertQuery, RevertClampQuery, RevertRemoveQuery,
     },
 };
-use graph::components::store::{EntityDerived, EntityKey, EntityType};
+use graph::components::store::{DerivedEntityQuery, EntityKey, EntityType};
 use graph::data::graphql::ext::{DirectiveFinder, DocumentExt, ObjectTypeExt};
 use graph::data::schema::{FulltextConfig, FulltextDefinition, Schema, SCHEMA_TYPE_NAME};
 use graph::data::store::BYTES_SCALAR;
@@ -542,7 +542,7 @@ impl Layout {
     pub fn find_derived(
         &self,
         conn: &PgConnection,
-        key: &EntityDerived,
+        key: &DerivedEntityQuery,
         block: BlockNumber,
     ) -> Result<Vec<Entity>, StoreError> {
         let table = self.table_for_entity(&key.entity_type)?;
