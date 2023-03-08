@@ -5,9 +5,7 @@ use std::time::Duration;
 use std::{collections::BTreeMap, sync::Arc};
 
 use graph::blockchain::block_stream::FirehoseCursor;
-use graph::components::store::{EntityKey, EntityDerived};
-use graph::components::store::ReadStore;
-use graph::components::store::{DeploymentCursorTracker, EntityKey};
+use graph::components::store::{DeploymentCursorTracker, EntityDerived, EntityKey, ReadStore};
 use graph::data::subgraph::schema;
 use graph::data_source::CausalityRegion;
 use graph::prelude::{
@@ -298,7 +296,11 @@ impl SyncStore {
         })
     }
 
-    fn get_where(&self, key: &EntityDerived, block: BlockNumber) -> Result<Vec<Entity>, StoreError> {
+    fn get_where(
+        &self,
+        key: &EntityDerived,
+        block: BlockNumber,
+    ) -> Result<Vec<Entity>, StoreError> {
         self.retry("get_where", || {
             self.writable.get_where(self.site.cheap_clone(), key, block)
         })
@@ -959,10 +961,7 @@ impl Writer {
         }
     }
 
-    fn get_where(
-        &self,
-        key: &EntityDerived,
-    ) -> Result<Vec<Entity>, StoreError> {
+    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
         match self {
             Writer::Sync(store) => store.get_where(key, BLOCK_NUMBER_MAX),
             Writer::Async(queue) => queue.get_where(key),
@@ -1051,10 +1050,7 @@ impl ReadStore for WritableStore {
         self.writer.get_many(keys)
     }
 
-    fn get_where(
-        &self,
-        key: &EntityDerived
-    ) -> Result<Vec<Entity>, StoreError> {
+    fn get_where(&self, key: &EntityDerived) -> Result<Vec<Entity>, StoreError> {
         self.writer.get_where(key)
     }
 
