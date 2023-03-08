@@ -5,7 +5,7 @@ use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
 use graph::anyhow::Context;
 use graph::blockchain::block_stream::FirehoseCursor;
-use graph::components::store::{EntityKey, EntityType, PruneReporter, StoredDynamicDataSource};
+use graph::components::store::{EntityKey, EntityType, PruneReporter, StoredDynamicDataSource, EntityDerived};
 use graph::components::versions::VERSIONS;
 use graph::data::query::Trace;
 use graph::data::subgraph::{status, SPEC_VERSION_0_0_6};
@@ -1081,6 +1081,17 @@ impl DeploymentStore {
         let layout = self.layout(&conn, site)?;
 
         layout.find_many(&conn, ids_for_type, block)
+    }
+
+    pub(crate) fn get_where(
+        &self,
+        site: Arc<Site>,
+        key: &EntityDerived,
+        block: BlockNumber,
+    ) -> Result<Vec<Entity>, StoreError> {
+        let conn = self.get_conn()?;
+        let layout = self.layout(&conn, site)?;
+        layout.find_where(&conn, key, block)
     }
 
     pub(crate) fn get_changes(
