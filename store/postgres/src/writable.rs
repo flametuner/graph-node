@@ -9,8 +9,7 @@ use graph::components::store::{DeploymentCursorTracker, DerivedEntityQuery, Enti
 use graph::data::subgraph::schema;
 use graph::data_source::CausalityRegion;
 use graph::prelude::{
-    BlockNumber, Entity, MetricsRegistry, Schema, SubgraphDeploymentEntity, SubgraphStore as _,
-    BLOCK_NUMBER_MAX,
+    BlockNumber, Entity, Schema, SubgraphDeploymentEntity, SubgraphStore as _, BLOCK_NUMBER_MAX,
 };
 use graph::slog::info;
 use graph::util::bounded_queue::BoundedQueue;
@@ -597,7 +596,7 @@ impl Queue {
         logger: Logger,
         store: Arc<SyncStore>,
         capacity: usize,
-        registry: Arc<dyn MetricsRegistry>,
+        registry: Arc<dyn MetricsRegistryTrait>,
     ) -> Arc<Self> {
         async fn start_writer(queue: Arc<Queue>, logger: Logger) {
             loop {
@@ -930,7 +929,7 @@ impl Writer {
         logger: Logger,
         store: Arc<SyncStore>,
         capacity: usize,
-        registry: Arc<dyn MetricsRegistry>,
+        registry: Arc<dyn MetricsRegistryTrait>,
     ) -> Self {
         info!(logger, "Starting subgraph writer"; "queue_size" => capacity);
         if capacity == 0 {
@@ -1072,7 +1071,7 @@ impl WritableStore {
         subgraph_store: SubgraphStore,
         logger: Logger,
         site: Arc<Site>,
-        registry: Arc<dyn MetricsRegistry>,
+        registry: Arc<dyn MetricsRegistryTrait>,
     ) -> Result<Self, StoreError> {
         let store = Arc::new(SyncStore::new(subgraph_store, logger.clone(), site)?);
         let block_ptr = Mutex::new(store.block_ptr().await?);
