@@ -1090,7 +1090,7 @@ impl DeploymentStore {
         site: Arc<Site>,
         key: &DerivedEntityQuery,
         block: BlockNumber,
-    ) -> Result<Vec<Entity>, StoreError> {
+    ) -> Result<BTreeMap<EntityKey, Entity>, StoreError> {
         let conn = self.get_conn()?;
         let layout = self.layout(&conn, site)?;
         layout.find_derived(&conn, key, block)
