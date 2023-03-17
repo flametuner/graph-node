@@ -649,7 +649,7 @@ impl Schema {
     /// example:
     ///
     /// type Account @entity {
-    ///     wallets: [Wallet!]! @derivedFrom("account")
+    ///     wallets: [Wallet!]! @derivedFrom(field: "account")
     /// }
     /// type Wallet {
     ///     account: Account!
@@ -680,7 +680,7 @@ impl Schema {
                 )
             })?;
         if field.is_derived() {
-            let derived_from = field.find_directive("derivedfrom").unwrap();
+            let derived_from = field.find_directive("derivedFrom").unwrap();
             let base_type = field.field_type.get_base_type();
             let field_name = derived_from.argument("field").unwrap();
 
