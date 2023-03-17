@@ -1092,7 +1092,7 @@ impl DeploymentStore {
         site: Arc<Site>,
         derived_query: &DerivedEntityQuery,
         block: BlockNumber,
-        excluded_keys: &Option<Vec<EntityKey>>,
+        excluded_keys: &Vec<EntityKey>,
     ) -> Result<BTreeMap<EntityKey, Entity>, StoreError> {
         let conn = self.get_conn()?;
         let layout = self.layout(&conn, site)?;
